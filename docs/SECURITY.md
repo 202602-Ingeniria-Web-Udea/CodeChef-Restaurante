@@ -340,6 +340,3 @@ Additional hardening is tracked separately and does not weaken any required cont
 - `REQUIREMENTS.md`
 - `API.md`
 - `DESIGNSYSTEM.md`
-- `ARCHITECTURE.md` (maintained separately)
-- `DATABASE.md` (maintained separately)
-- `DEPLOY.md` (maintained separately)
