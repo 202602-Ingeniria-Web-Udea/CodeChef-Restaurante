@@ -11,3 +11,119 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
+enum Rol {
+  ADMIN
+  USER
+}
+
+enum TipoMovimiento {
+  ENTRADA
+  SALIDA
+}
+
+enum Unidad {
+  KG
+  GR
+  ML
+  L
+  UNIDADES
+}
+
+enum EstadoPedido {
+  PENDIENTE
+  EN_PREPARACION
+  ENTREGADO
+  CANCELADO
+}
+
+enum MetodoPago {
+  EFECTIVO
+  TARJETA
+  TRANSFERENCIA
+}
+
+enum EstadoMaestro {
+  ACTIVO
+  INACTIVO
+}
+
+model Usuarios {
+  id            Int             @id @default(autoincrement())
+  rol           Rol             @default(USER)
+  nombreUsuario String
+  contrasena    String
+  fechaCreacion DateTime        @default(now())
+  correoUsuario String          @unique
+  foto          String?
+  transacciones Transacciones[]
+  maestros      Maestro[]
+  pedidos       Pedidos[]
+}
+
+model Maestro {
+  id              Int             @id @default(autoincrement())
+  creadoPorId     Int
+  creadoPor       Usuarios        @relation(fields: [creadoPorId], references: [id])
+  nombreMaestro   String          @unique
+  unidad          Unidad
+  cantidadMaestro Decimal         @db.Decimal(10, 3)
+  fechaCreacion   DateTime        @default(now())
+  estado          EstadoMaestro   @default(ACTIVO)
+  transacciones   Transacciones[]
+  recetas         Recetas[]
+}
+
+model Transacciones {
+  id                  Int            @id @default(autoincrement())
+  maestroId           Int
+  maestro             Maestro        @relation(fields: [maestroId], references: [id])
+  fechaTransaccion    DateTime       @default(now())
+  cantidadTransaccion Decimal        @db.Decimal(10, 3)
+  tipoMovimiento      TipoMovimiento
+  creadoPorId         Int
+  creadoPor           Usuarios       @relation(fields: [creadoPorId], references: [id])
+  saldoResultante     Decimal        @db.Decimal(10, 3)
+}
+
+model Producto {
+  id             Int             @id @default(autoincrement())
+  nombreProdcuto String
+  precio         Int
+  categoria      String
+  recetas        Recetas[]
+  pedidos        Pedidos[]
+  detallePedidos DetallePedido[]
+}
+
+model Recetas {
+  id          Int      @id @default(autoincrement())
+  productoId  Int
+  producto    Producto @relation(fields: [productoId], references: [id])
+  maestroId   Int
+  maestro     Maestro  @relation(fields: [maestroId], references: [id])
+  cantidadUso Decimal  @db.Decimal(10, 3)
+}
+
+model Pedidos {
+  id          Int             @id @default(autoincrement())
+  usuarioId   Int
+  usuario     Usuarios        @relation(fields: [usuarioId], references: [id])
+  estado      EstadoPedido    @default(PENDIENTE)
+  metodoPago  MetodoPago?
+  total       Int
+  fechaPedido DateTime        @default(now())
+  detalles    DetallePedido[]
+  producto    Producto?       @relation(fields: [productoId], references: [id])
+  productoId  Int?
+}
+
+model DetallePedido {
+  id             Int      @id @default(autoincrement())
+  pedidoId       Int
+  pedido         Pedidos  @relation(fields: [pedidoId], references: [id])
+  productoId     Int
+  producto       Producto @relation(fields: [productoId], references: [id])
+  cantidad       Int
+  precioUnitario Int
+}
