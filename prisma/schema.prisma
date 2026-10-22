@@ -12,118 +12,144 @@ datasource db {
   provider = "postgresql"
 }
 
-enum Rol {
+enum Role {
   ADMIN
   USER
 }
 
-enum TipoMovimiento {
-  ENTRADA
-  SALIDA
+enum MovementType {
+  IN
+  OUT
 }
 
-enum Unidad {
+enum Unit {
   KG
-  GR
+  G
   ML
   L
-  UNIDADES
+  UNITS
 }
 
-enum EstadoPedido {
-  PENDIENTE
-  EN_PREPARACION
-  ENTREGADO
-  CANCELADO
+enum OrderStatus {
+  PENDING
+  PREPARING
+  DELIVERED
+  CANCELLED
 }
 
-enum MetodoPago {
-  EFECTIVO
-  TARJETA
-  TRANSFERENCIA
+enum PaymentMethod {
+  CASH
+  CARD
+  TRANSFER
 }
 
-enum EstadoMaestro {
-  ACTIVO
-  INACTIVO
+enum PaymentStatus {
+  PENDING
+  PAID
+  REJECTED
+  REFUNDED
 }
 
-model Usuarios {
-  id            Int             @id @default(autoincrement())
-  rol           Rol             @default(USER)
-  nombreUsuario String
-  contrasena    String
-  fechaCreacion DateTime        @default(now())
-  correoUsuario String          @unique
-  foto          String?
-  transacciones Transacciones[]
-  maestros      Maestro[]
-  pedidos       Pedidos[]
+enum IngredientStatus {
+  ACTIVE
+  INACTIVE
 }
 
-model Maestro {
-  id              Int             @id @default(autoincrement())
-  creadoPorId     Int
-  creadoPor       Usuarios        @relation(fields: [creadoPorId], references: [id])
-  nombreMaestro   String          @unique
-  unidad          Unidad
-  cantidadMaestro Decimal         @db.Decimal(10, 3)
-  fechaCreacion   DateTime        @default(now())
-  estado          EstadoMaestro   @default(ACTIVO)
-  transacciones   Transacciones[]
-  recetas         Recetas[]
+model User {
+  id        Int      @id @default(autoincrement())
+  role      Role     @default(USER)
+  name      String
+  password  String
+  email     String   @unique
+  photo     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  transactions InventoryTransaction[]
+  ingredients  Ingredient[]
+  orders       Order[]
 }
 
-model Transacciones {
-  id                  Int            @id @default(autoincrement())
-  maestroId           Int
-  maestro             Maestro        @relation(fields: [maestroId], references: [id])
-  fechaTransaccion    DateTime       @default(now())
-  cantidadTransaccion Decimal        @db.Decimal(10, 3)
-  tipoMovimiento      TipoMovimiento
-  creadoPorId         Int
-  creadoPor           Usuarios       @relation(fields: [creadoPorId], references: [id])
-  saldoResultante     Decimal        @db.Decimal(10, 3)
+model Ingredient {
+  id        Int              @id @default(autoincrement())
+  name      String           @unique
+  unit      Unit
+  stock     Decimal          @db.Decimal(10, 3)
+  status    IngredientStatus @default(ACTIVE)
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+
+  createdById Int
+  createdBy   User @relation(fields: [createdById], references: [id])
+
+  transactions InventoryTransaction[]
+  recipes      Recipe[]
 }
 
-model Producto {
-  id             Int             @id @default(autoincrement())
-  nombreProdcuto String
-  precio         Int
-  categoria      String
-  recetas        Recetas[]
-  pedidos        Pedidos[]
-  detallePedidos DetallePedido[]
+model InventoryTransaction {
+  id           Int          @id @default(autoincrement())
+  createdAt    DateTime     @default(now())
+  quantity     Decimal      @db.Decimal(10, 3)
+  balanceAfter Decimal      @db.Decimal(10, 3)
+  type         MovementType
+  reason       String?
+
+  ingredientId Int
+  ingredient   Ingredient @relation(fields: [ingredientId], references: [id])
+
+  createdById Int
+  createdBy   User @relation(fields: [createdById], references: [id])
 }
 
-model Recetas {
-  id          Int      @id @default(autoincrement())
-  productoId  Int
-  producto    Producto @relation(fields: [productoId], references: [id])
-  maestroId   Int
-  maestro     Maestro  @relation(fields: [maestroId], references: [id])
-  cantidadUso Decimal  @db.Decimal(10, 3)
+model Product {
+  id        Int      @id @default(autoincrement())
+  name      String
+  price     Int
+  category  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  recipes    Recipe[]
+  orderItems OrderItem[]
 }
 
-model Pedidos {
-  id          Int             @id @default(autoincrement())
-  usuarioId   Int
-  usuario     Usuarios        @relation(fields: [usuarioId], references: [id])
-  estado      EstadoPedido    @default(PENDIENTE)
-  metodoPago  MetodoPago?
-  total       Int
-  fechaPedido DateTime        @default(now())
-  detalles    DetallePedido[]
-  producto    Producto?       @relation(fields: [productoId], references: [id])
-  productoId  Int?
+model Recipe {
+  id           Int     @id @default(autoincrement())
+  quantityUsed Decimal @db.Decimal(10, 3)
+
+  productId Int
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  ingredientId Int
+  ingredient   Ingredient @relation(fields: [ingredientId], references: [id])
+
+  @@unique([productId, ingredientId])
 }
 
-model DetallePedido {
-  id             Int      @id @default(autoincrement())
-  pedidoId       Int
-  pedido         Pedidos  @relation(fields: [pedidoId], references: [id])
-  productoId     Int
-  producto       Producto @relation(fields: [productoId], references: [id])
-  cantidad       Int
-  precioUnitario Int
+model Order {
+  id            Int            @id @default(autoincrement())
+  status        OrderStatus    @default(PENDING)
+  paymentMethod PaymentMethod?
+  paymentStatus PaymentStatus  @default(PENDING)
+  total         Int
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  userId Int
+  user   User @relation(fields: [userId], references: [id])
+
+  items OrderItem[]
+}
+
+model OrderItem {
+  id        Int     @id @default(autoincrement())
+  quantity  Int
+  unitPrice Int
+  note      String?
+
+  orderId Int
+  order   Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  productId Int
+  product   Product @relation(fields: [productId], references: [id])
 }
