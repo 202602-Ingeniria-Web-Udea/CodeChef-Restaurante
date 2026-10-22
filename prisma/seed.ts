@@ -6,8 +6,13 @@ import bcrypt from "bcryptjs";
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
 const prisma = new PrismaClient({ adapter });
 
+// Redondea a 3 decimales (igual que Decimal(10, 3) en la base de datos)
+const round3 = (n: number) => Math.round(n * 1000) / 1000;
+
 async function main() {
-  // 1. Limpiar (en orden: primero lo que depende de otras tablas)
+  // ─────────────────────────────────────────────
+  // 1. Limpiar (primero lo que depende de otras tablas)
+  // ─────────────────────────────────────────────
   await prisma.orderItem.deleteMany();
   await prisma.order.deleteMany();
   await prisma.recipe.deleteMany();
@@ -16,7 +21,9 @@ async function main() {
   await prisma.ingredient.deleteMany();
   await prisma.user.deleteMany();
 
+  // ─────────────────────────────────────────────
   // 2. Usuarios
+  // ─────────────────────────────────────────────
   const admin = await prisma.user.create({
     data: {
       name: "Admin",
@@ -26,40 +33,233 @@ async function main() {
     },
   });
 
-  await prisma.user.create({
+  const laura = await prisma.user.create({
     data: {
-      name: "Cliente Prueba",
-      email: "cliente@codechef.com",
+      name: "Laura Gómez",
+      email: "laura@codechef.com",
       password: await bcrypt.hash("cliente123", 10),
     },
   });
 
-  // 3. Ingredientes
-  const pan = await prisma.ingredient.create({
-    data: { name: "Hamburger bun", unit: "UNITS", stock: 50, createdById: admin.id },
-  });
-  const carne = await prisma.ingredient.create({
-    data: { name: "Beef patty", unit: "UNITS", stock: 40, createdById: admin.id },
-  });
-  const tomate = await prisma.ingredient.create({
-    data: { name: "Tomato", unit: "KG", stock: 5, createdById: admin.id },
-  });
-
-  // 4. Producto con su receta
-  await prisma.product.create({
+  const andres = await prisma.user.create({
     data: {
-      name: "Classic Burger",
-      price: 18000,
-      category: "Burgers",
-      recipes: {
-        create: [
-          { ingredientId: pan.id, quantityUsed: 1 },
-          { ingredientId: carne.id, quantityUsed: 1 },
-          { ingredientId: tomate.id, quantityUsed: 0.05 },
-        ],
-      },
+      name: "Andrés Restrepo",
+      email: "andres@codechef.com",
+      password: await bcrypt.hash("cliente123", 10),
     },
   });
+
+  // ─────────────────────────────────────────────
+  // 3. Ingredientes + transacción de stock inicial (IN)
+  // ─────────────────────────────────────────────
+  const ingredientsData = [
+    { key: "bun",     name: "Hamburger bun",  unit: "UNITS", stock: 60 },
+    { key: "patty",   name: "Beef patty",     unit: "UNITS", stock: 50 },
+    { key: "cheese",  name: "Cheese slice",   unit: "UNITS", stock: 80 },
+    { key: "tomato",  name: "Tomato",         unit: "KG",    stock: 5 },
+    { key: "lettuce", name: "Lettuce",        unit: "KG",    stock: 3 },
+    { key: "potato",  name: "Potato",         unit: "KG",    stock: 20 },
+    { key: "chicken", name: "Chicken breast", unit: "KG",    stock: 10 },
+    { key: "soda",    name: "Soda can",       unit: "UNITS", stock: 48 },
+  ] as const;
+
+  // Aquí guardamos el id y el stock "en memoria" de cada ingrediente
+  const ing: Record<string, { id: number; stock: number }> = {};
+
+  for (const i of ingredientsData) {
+    const created = await prisma.ingredient.create({
+      data: { name: i.name, unit: i.unit, stock: i.stock, createdById: admin.id },
+    });
+
+    await prisma.inventoryTransaction.create({
+      data: {
+        ingredientId: created.id,
+        quantity: i.stock,
+        balanceAfter: i.stock,
+        type: "IN",
+        reason: "Initial stock",
+        createdById: admin.id,
+      },
+    });
+
+    ing[i.key] = { id: created.id, stock: i.stock };
+  }
+
+  // Registra un movimiento de inventario y actualiza el stock en memoria
+  async function moveStock(
+    key: string,
+    quantity: number,
+    type: "IN" | "OUT",
+    reason: string
+  ) {
+    const item = ing[key];
+    item.stock = round3(type === "IN" ? item.stock + quantity : item.stock - quantity);
+
+    await prisma.inventoryTransaction.create({
+      data: {
+        ingredientId: item.id,
+        quantity,
+        balanceAfter: item.stock,
+        type,
+        reason,
+        createdById: admin.id,
+      },
+    });
+  }
+
+  // ─────────────────────────────────────────────
+  // 4. Productos con sus recetas
+  // ─────────────────────────────────────────────
+  const productsData = [
+    {
+      key: "classic", name: "Classic Burger", price: 18000, category: "Burgers",
+      recipe: [["bun", 1], ["patty", 1], ["tomato", 0.05], ["lettuce", 0.03]],
+    },
+    {
+      key: "cheese", name: "Cheeseburger", price: 21000, category: "Burgers",
+      recipe: [["bun", 1], ["patty", 1], ["cheese", 2], ["lettuce", 0.03]],
+    },
+    {
+      key: "chicken", name: "Grilled Chicken", price: 24000, category: "Mains",
+      recipe: [["chicken", 0.2], ["tomato", 0.05], ["lettuce", 0.05]],
+    },
+    {
+      key: "fries", name: "French Fries", price: 8000, category: "Sides",
+      recipe: [["potato", 0.25]],
+    },
+    {
+      key: "soda", name: "Soda", price: 5000, category: "Drinks",
+      recipe: [["soda", 1]],
+    },
+  ] as const;
+
+  const prod: Record<
+    string,
+    { id: number; price: number; recipe: readonly (readonly [string, number])[] }
+  > = {};
+
+  for (const p of productsData) {
+    const created = await prisma.product.create({
+      data: {
+        name: p.name,
+        price: p.price,
+        category: p.category,
+        recipes: {
+          create: p.recipe.map(([key, qty]) => ({
+            ingredientId: ing[key].id,
+            quantityUsed: qty,
+          })),
+        },
+      },
+    });
+    prod[p.key] = { id: created.id, price: p.price, recipe: p.recipe };
+  }
+
+  // ─────────────────────────────────────────────
+  // 5. Pedidos con sus detalles (y descuento de inventario)
+  // ─────────────────────────────────────────────
+  async function createOrder(opts: {
+    userId: number;
+    status: "PENDING" | "PREPARING" | "DELIVERED" | "CANCELLED";
+    paymentStatus: "PENDING" | "PAID" | "REJECTED" | "REFUNDED";
+    paymentMethod?: "CASH" | "CARD" | "TRANSFER";
+    items: { product: string; quantity: number; note?: string }[];
+  }) {
+    const total = opts.items.reduce(
+      (sum, it) => sum + prod[it.product].price * it.quantity,
+      0
+    );
+
+    const order = await prisma.order.create({
+      data: {
+        userId: opts.userId,
+        status: opts.status,
+        paymentStatus: opts.paymentStatus,
+        paymentMethod: opts.paymentMethod,
+        total,
+        items: {
+          create: opts.items.map((it) => ({
+            productId: prod[it.product].id,
+            quantity: it.quantity,
+            unitPrice: prod[it.product].price,
+            note: it.note,
+          })),
+        },
+      },
+    });
+
+    // Solo descuentan inventario los pedidos que ya se están preparando o se entregaron
+    if (opts.status === "PREPARING" || opts.status === "DELIVERED") {
+      // Suma cuánto se usa de cada ingrediente en todo el pedido
+      const usage: Record<string, number> = {};
+      for (const it of opts.items) {
+        for (const [key, qty] of prod[it.product].recipe) {
+          usage[key] = round3((usage[key] ?? 0) + qty * it.quantity);
+        }
+      }
+      for (const [key, qty] of Object.entries(usage)) {
+        await moveStock(key, qty, "OUT", `Order #${order.id}`);
+      }
+    }
+  }
+
+  await createOrder({
+    userId: laura.id,
+    status: "DELIVERED",
+    paymentStatus: "PAID",
+    paymentMethod: "CASH",
+    items: [
+      { product: "classic", quantity: 1 },
+      { product: "classic", quantity: 1, note: "No tomato" },
+      { product: "fries", quantity: 1 },
+      { product: "soda", quantity: 2 },
+    ],
+  });
+
+  await createOrder({
+    userId: andres.id,
+    status: "PREPARING",
+    paymentStatus: "PAID",
+    paymentMethod: "CARD",
+    items: [
+      { product: "cheese", quantity: 1, note: "Extra cheese" },
+      { product: "fries", quantity: 1 },
+    ],
+  });
+
+  await createOrder({
+    userId: laura.id,
+    status: "PENDING",
+    paymentStatus: "PENDING",
+    items: [
+      { product: "chicken", quantity: 1 },
+      { product: "soda", quantity: 1 },
+    ],
+  });
+
+  await createOrder({
+    userId: andres.id,
+    status: "CANCELLED",
+    paymentStatus: "REFUNDED",
+    paymentMethod: "TRANSFER",
+    items: [{ product: "classic", quantity: 2 }],
+  });
+
+  // ─────────────────────────────────────────────
+  // 6. Ajustes manuales de inventario
+  // ─────────────────────────────────────────────
+  await moveStock("tomato", 0.5, "OUT", "Expired product");
+  await moveStock("soda", 24, "IN", "Supplier delivery");
+
+  // ─────────────────────────────────────────────
+  // 7. Guardar el stock final de cada ingrediente
+  // ─────────────────────────────────────────────
+  for (const item of Object.values(ing)) {
+    await prisma.ingredient.update({
+      where: { id: item.id },
+      data: { stock: item.stock },
+    });
+  }
 
   console.log("Seed completed ✅");
 }
