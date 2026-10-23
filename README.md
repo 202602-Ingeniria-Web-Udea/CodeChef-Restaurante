@@ -233,7 +233,27 @@ pnpm dev
 
 Open [http://localhost:3000](http://localhost:3000) in your browser.
 
+### Test Credentials (Cuentas de Acceso de Evaluación)
+
+| Rol | Correo Electrónico | Contraseña | Permisos |
+| --- | --- | --- | --- |
+| `ADMIN` | `admin@codechef.com` | `admin123` | Acceso total: Usuarios, creación de Maestros, Transacciones |
+| `USER` | `laura@codechef.com` | `cliente123` | Acceso operativo: Visualización de Maestros y Transacciones, creación de movimientos |
+| `USER` | `andres@codechef.com` | `cliente123` | Acceso operativo: Visualización de Maestros y Transacciones, creación de movimientos |
+
 ### Run Tests
+
+Run automated unit and integration tests (Vitest):
+
+```bash
+pnpm test
+```
+
+Run TypeScript verification:
+
+```bash
+pnpm typecheck
+```
 
 Run ESLint:
 
