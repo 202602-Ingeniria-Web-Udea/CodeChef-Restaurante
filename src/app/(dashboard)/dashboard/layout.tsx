@@ -14,13 +14,13 @@ export default async function DashboardLayout({
   }
 
   return (
-    <div className="min-h-screen bg-stone-950 text-stone-100 flex">
-      {/* Sidebar fijo a la izquierda */}
+    <div className="min-h-screen bg-stone-950 text-stone-100 flex flex-col lg:flex-row">
+      {/* Sidebar (fijo en desktop >= lg, cabecera móvil con drawer en pantallas < lg) */}
       <Sidebar user={session.user} />
 
-      {/* Contenedor principal con margen izquierdo para no sobreponerse al sidebar fijo */}
-      <div className="flex-1 ml-64 min-h-screen flex flex-col bg-stone-950">
-        <main className="flex-1 p-6 sm:p-10 max-w-7xl w-full mx-auto">
+      {/* Contenedor principal: ml-0 en móvil y lg:ml-64 en desktop para acomodar el sidebar */}
+      <div className="flex-1 lg:ml-64 min-h-screen flex flex-col bg-stone-950">
+        <main className="flex-1 p-4 sm:p-6 lg:p-10 max-w-7xl w-full mx-auto">
           {children}
         </main>
       </div>

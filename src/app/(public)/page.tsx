@@ -84,7 +84,7 @@ export default async function LandingPage() {
           </div>
 
           <div className="p-6 rounded-2xl bg-stone-900/60 border border-stone-800/80 hover:border-orange-500/40 transition-colors">
-            <div className="w-12 h-12 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-2xl mb-4">
+            <div className="w-12 h-12 rounded-xl bg-orange-500/10 text-orange-400 flex items-center justify-center text-2xl mb-4">
               🛡️
             </div>
             <h2 className="text-lg font-bold text-white mb-2">Roles Diferenciados</h2>

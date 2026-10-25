@@ -61,7 +61,7 @@ export function UsersView({ currentUserId, initialData = [] }: UsersViewProps) {
           <span className="px-3 py-1.5 rounded-lg bg-orange-500/10 text-orange-400">
             {adminCount} ADMIN
           </span>
-          <span className="px-3 py-1.5 rounded-lg bg-emerald-500/10 text-emerald-400">
+          <span className="px-3 py-1.5 rounded-lg bg-stone-800 text-stone-300 border border-stone-700/60">
             {users.length - adminCount} USER
           </span>
         </div>

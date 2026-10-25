@@ -168,7 +168,7 @@ export function TransactionsView() {
         <SummaryCard
           label="Total entradas"
           value={current ? `+${formatQuantity(totals.in)}` : "—"}
-          accent="text-emerald-400"
+          accent="text-amber-400"
         />
         <SummaryCard
           label="Total salidas"

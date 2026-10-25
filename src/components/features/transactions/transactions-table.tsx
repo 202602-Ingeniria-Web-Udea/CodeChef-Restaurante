@@ -94,7 +94,7 @@ export function TransactionsTable({ transactions, unit, loading }: TransactionsT
                         <span
                           className={`inline-block px-2 py-0.5 rounded-md text-[10px] font-bold ${
                             isIn
-                              ? "bg-emerald-500/10 text-emerald-400"
+                              ? "bg-amber-500/10 text-amber-300"
                               : "bg-red-500/10 text-red-400"
                           }`}
                         >
@@ -103,7 +103,7 @@ export function TransactionsTable({ transactions, unit, loading }: TransactionsT
                       </td>
                       <td
                         className={`py-3.5 px-4 sm:px-6 text-right font-mono font-bold whitespace-nowrap ${
-                          isIn ? "text-emerald-400" : "text-red-400"
+                          isIn ? "text-amber-300" : "text-red-400"
                         }`}
                       >
                         {isIn ? "+" : "−"}

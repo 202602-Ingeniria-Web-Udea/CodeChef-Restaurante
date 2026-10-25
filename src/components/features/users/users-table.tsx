@@ -120,7 +120,7 @@ export function UsersTable({ users, loading, currentUserId, onEdit }: UsersTable
                         className={`inline-block px-2 py-0.5 rounded-md text-[10px] font-bold ${
                           user.role === "ADMIN"
                             ? "bg-orange-500/10 text-orange-400"
-                            : "bg-emerald-500/10 text-emerald-400"
+                            : "bg-stone-800 text-stone-300 border border-stone-700/60"
                         }`}
                       >
                         {user.role}

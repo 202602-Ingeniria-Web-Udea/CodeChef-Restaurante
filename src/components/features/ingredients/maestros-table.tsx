@@ -19,21 +19,29 @@ export interface MaestroItem {
 interface MaestrosTableProps {
   maestros: MaestroItem[];
   loading: boolean;
+  isAdmin?: boolean;
+  onToggleStatus?: (item: MaestroItem) => void;
 }
 
-export function MaestrosTable({ maestros, loading }: MaestrosTableProps) {
+export function MaestrosTable({
+  maestros,
+  loading,
+  isAdmin = false,
+  onToggleStatus,
+}: MaestrosTableProps) {
   const [search, setSearch] = useState("");
 
-  const filtered = maestros.filter((m) =>
-    m.name.toLowerCase().includes(search.toLowerCase()) ||
-    m.createdBy?.name.toLowerCase().includes(search.toLowerCase())
+  const filtered = maestros.filter(
+    (m) =>
+      m.name.toLowerCase().includes(search.toLowerCase()) ||
+      m.createdBy?.name.toLowerCase().includes(search.toLowerCase())
   );
 
   return (
     <div className="space-y-4">
       {/* Search Bar */}
-      <div className="flex items-center justify-between gap-4">
-        <div className="relative w-full max-w-sm">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div className="relative w-full sm:max-w-sm">
           <input
             type="text"
             value={search}
@@ -66,15 +74,17 @@ export function MaestrosTable({ maestros, loading }: MaestrosTableProps) {
                 <th className="py-3.5 px-4 sm:px-6">Nombre del Maestro</th>
                 <th className="py-3.5 px-4 sm:px-6 text-right">Saldo del Maestro</th>
                 <th className="py-3.5 px-4 sm:px-6">Unidad</th>
+                <th className="py-3.5 px-4 sm:px-6">Estado</th>
                 <th className="py-3.5 px-4 sm:px-6">Creado Por</th>
                 <th className="py-3.5 px-4 sm:px-6 text-right">Fecha Creación</th>
+                {isAdmin && <th className="py-3.5 px-4 sm:px-6 text-right">Acciones</th>}
               </tr>
             </thead>
 
             <tbody className="divide-y divide-stone-800/60 font-medium">
               {loading ? (
                 <tr>
-                  <td colSpan={6} className="py-12 text-center text-stone-500">
+                  <td colSpan={isAdmin ? 8 : 7} className="py-12 text-center text-stone-500">
                     <div className="flex flex-col items-center justify-center gap-2">
                       <svg className="animate-spin w-5 h-5 text-orange-500" fill="none" viewBox="0 0 24 24">
                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
@@ -86,34 +96,46 @@ export function MaestrosTable({ maestros, loading }: MaestrosTableProps) {
                 </tr>
               ) : filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="py-12 text-center text-stone-500">
+                  <td colSpan={isAdmin ? 8 : 7} className="py-12 text-center text-stone-500">
                     No se encontraron maestros registrados.
                   </td>
                 </tr>
               ) : (
                 filtered.map((item) => (
-                  <tr key={item.id} className="hover:bg-stone-850/50 transition-colors">
+                  <tr key={item.id} className="hover:bg-stone-800/40 transition-colors">
                     <td className="py-3.5 px-4 sm:px-6 font-mono text-stone-400">
                       #{item.id}
                     </td>
 
-                    <td className="py-3.5 px-4 sm:px-6 font-bold text-white">
+                    <td className="py-3.5 px-4 sm:px-6 font-bold text-white whitespace-nowrap">
                       {item.name}
                     </td>
 
-                    <td className="py-3.5 px-4 sm:px-6 text-right font-mono font-bold text-orange-400">
+                    <td className="py-3.5 px-4 sm:px-6 text-right font-mono font-bold text-orange-400 whitespace-nowrap">
                       {typeof item.stock === "number"
                         ? item.stock.toFixed(3)
                         : Number(item.stock).toFixed(3)}
                     </td>
 
-                    <td className="py-3.5 px-4 sm:px-6">
+                    <td className="py-3.5 px-4 sm:px-6 whitespace-nowrap">
                       <span className="inline-block px-2 py-0.5 rounded-md bg-stone-800 text-[10px] font-bold text-stone-300">
                         {item.unit}
                       </span>
                     </td>
 
-                    <td className="py-3.5 px-4 sm:px-6 text-stone-200">
+                    <td className="py-3.5 px-4 sm:px-6 whitespace-nowrap">
+                      <span
+                        className={`inline-block px-2 py-0.5 rounded-md text-[10px] font-bold ${
+                          item.status === "ACTIVE"
+                            ? "bg-orange-500/15 text-orange-400 border border-orange-500/30"
+                            : "bg-stone-800 text-stone-400 border border-stone-700/60"
+                        }`}
+                      >
+                        {item.status === "ACTIVE" ? "Activo" : "Inactivo"}
+                      </span>
+                    </td>
+
+                    <td className="py-3.5 px-4 sm:px-6 text-stone-200 whitespace-nowrap">
                       <div className="flex items-center gap-2">
                         <div className="w-6 h-6 rounded-full bg-orange-600/20 text-orange-400 flex items-center justify-center text-[10px] font-bold">
                           {(item.createdBy?.name || "U").charAt(0).toUpperCase()}
@@ -124,13 +146,25 @@ export function MaestrosTable({ maestros, loading }: MaestrosTableProps) {
                       </div>
                     </td>
 
-                    <td className="py-3.5 px-4 sm:px-6 text-right text-stone-400 font-mono text-[11px]">
+                    <td className="py-3.5 px-4 sm:px-6 text-right text-stone-400 font-mono text-[11px] whitespace-nowrap">
                       {new Date(item.createdAt).toLocaleDateString("es-CO", {
                         year: "numeric",
                         month: "short",
                         day: "numeric",
                       })}
                     </td>
+
+                    {isAdmin && (
+                      <td className="py-3.5 px-4 sm:px-6 text-right whitespace-nowrap">
+                        <button
+                          type="button"
+                          onClick={() => onToggleStatus?.(item)}
+                          className="px-2.5 py-1 rounded-lg text-[11px] font-semibold text-stone-300 hover:text-white bg-stone-800 hover:bg-stone-700 transition"
+                        >
+                          {item.status === "ACTIVE" ? "Desactivar" : "Activar"}
+                        </button>
+                      </td>
+                    )}
                   </tr>
                 ))
               )}

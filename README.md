@@ -1,328 +1,189 @@
-# Antorcha
+# CodeChef — Antorcha Restaurante & Inventario
 
-> A restaurant management web application for managing inventory, products, transactions, and user access through a responsive administrative dashboard.
+> Sistema de gestión administrativa para restaurante con trazabilidad de maestros, transacciones de inventario con cálculo atómico de saldos, gráficas de evolución diaria, y control de acceso basado en roles (`ADMIN` y `USER`).
 
-## Project Information
+Proyecto evaluativo para la asignatura **Ingeniería Web (35%)** — Universidad de Antioquia.
 
-| Field | Value |
-| --- | --- |
-| Status | Completed |
-| Platform | Responsive web application |
-| Language | TypeScript |
-| UI | Next.js, React, Tailwind CSS, shadcn/ui |
-| Repository | [GitHub](<repository-url>) |
+---
 
-## Overview
+## Integrantes del Equipo
 
-Antorcha is a restaurant management application designed to centralize administrative operations in a single, responsive interface. It supports the management of restaurant products, categories, ingredients, inventory, orders, payments, transactions, reports, and user accounts.
-
-The application is tailored to a restaurant-bar focused on grilled dishes, hamburgers, fries, skewers, meat, and cheese-based meals. Its interface combines a consistent visual identity with reusable components and responsive layouts.
-
-Antorcha includes authentication and role-based access control for `ADMIN` and `USER` accounts. Users can access the management features permitted by their roles, while administrative functions remain restricted to authorized personnel.
-
-The project was developed as part of the Web Engineering course at Universidad de Antioquia.
-
-## Tech Stack
-
-| Layer | Technology | Purpose |
+| Nombre | Correo Institucional | Rol en el Proyecto |
 | --- | --- | --- |
-| Language | TypeScript | Type-safe application development |
-| UI | Next.js, React | Application pages and interactive user interfaces |
-| Styling | Tailwind CSS | Responsive styling and design utilities |
-| Components | shadcn/ui, Base UI, Mira preset | Reusable UI components and dashboard interface |
-| Backend | Next.js App Router, Route Handlers | Server-side operations and API endpoints |
-| Database | Supabase PostgreSQL | Persistent application data |
-| ORM | Prisma | Database access and schema management |
-| Authentication | Auth.js | Authentication and session management |
-| Password Security | bcryptjs | Password hashing and verification |
-| Build / Tooling | pnpm, ESLint, TypeScript | Dependency management, linting, and type checking |
-| Testing | ESLint, production build, manual verification | Code quality and application validation |
-| Deployment | Vercel | Web application hosting |
+| **Jesus David Torres Quejada** | `jesus.torresq@udea.edu.co` | Desarrollador Fullstack |
+| **Daniela Vela** | `daniela.vela@udea.edu.co` | Administradora de Base de Datos & Backend |
+| **Isabela Bedoya** | `isabela.bedoya@udea.edu.co` | Desarrolladora Fullstack |
 
-## Features
+- **Repositorio:** [202602-Ingeniria-Web-Udea/CodeChef-Restaurante](https://github.com/202602-Ingeniria-Web-Udea/CodeChef-Restaurante)
+- **Despliegue en Vercel:** [codechef-restaurante.vercel.app](https://codechef-restaurante.vercel.app)
 
-### Authentication and Access Control
+---
 
-- User sign-in and session management.
-- Role-based access control for `ADMIN` and `USER` accounts.
-- Protected pages and server-side authorization checks.
-- Restricted administrative operations.
+## Credenciales de Acceso para Evaluación
 
-### Dashboard and Navigation
+La base de datos cuenta con usuarios sembrados con contraseñas hasheadas con `bcryptjs`:
 
-- Responsive administrative dashboard.
-- Persistent sidebar navigation on desktop layouts.
-- Navigation links based on user permissions.
-- Consistent visual styling and reusable interface components.
+| Rol | Correo Electrónico | Contraseña | Permisos Otorgados |
+| --- | --- | --- | --- |
+| **`ADMIN`** | `admin@codechef.com` | `admin123` | **Acceso total:** Puede crear Maestros, editar roles de usuarios, gestionar transacciones (entradas/salidas) y ver todas las gráficas. |
+| **`USER`** | `laura@codechef.com` | `cliente123` | **Acceso operativo:** Puede consultar Maestros, registrar movimientos (entradas/salidas) y consultar gráficas. **No** puede ver la sección de usuarios ni crear maestros. |
+| **`USER`** | `andres@codechef.com` | `cliente123` | **Acceso operativo:** Mismos permisos que usuario estándar. |
 
-### Product and Catalog Management
+> **Nota:** La pantalla de inicio de sesión (`/login`) cuenta con botones de acceso rápido que rellenan automáticamente las credenciales con un solo clic.
 
-- Product catalog management.
-- Category management.
-- Ingredient management.
-- Data tables and forms for managing registered records.
-- Administrative restrictions for protected catalog operations.
+---
 
-### Inventory Management
+## Requisitos Previos
 
-- Inventory overview and stock tracking.
-- Inventory movement registration and history.
-- Incoming and outgoing stock movements.
-- Validation of quantities and movement data.
+- **Node.js:** Versión 22.x LTS (o >= 20.19.43)
+- **pnpm:** Versión 10.x / 12.x (`npm install -g pnpm`)
+- **Base de Datos:** Instancia PostgreSQL en Supabase
 
-### Orders and Payments
+---
 
-- Order registration and consultation.
-- Order information and status management.
-- Payment records associated with restaurant operations.
-- Validation and feedback for data operations.
+## Instalación y Ejecución Local Paso a Paso
 
-### Transactions and Reports
-
-- Transaction and inventory movement tables.
-- Selection of the relevant inventory item.
-- Daily balance history and graphical visualization.
-- Reports based on recorded operational data.
-
-### User Management
-
-- User listing and account information.
-- Role assignment for `ADMIN` and `USER` accounts.
-- Administrative access restrictions.
-- Feedback for successful and unsuccessful operations.
-
-## Project Structure
-
-```text
-antorcha/
-├── docs/
-│   ├── screenshots/
-│   │   ├── mobile.png
-│   │   └── desktop.png
-│   ├── API.md
-│   ├── DEPLOY.md
-│   ├── DESIGNSYSTEM.md
-│   ├── REQUIREMENTS.md
-│   ├── SECURITY.md
-│   └── SPEC.md
-├── prisma/
-│   ├── migrations/
-│   ├── schema.prisma
-│   └── seed.ts
-├── public/
-│   └── assets/
-├── src/
-│   ├── app/
-│   │   ├── (auth)/
-│   │   ├── (dashboard)/
-│   │   ├── (public)/
-│   │   ├── api/
-│   │   ├── error.tsx
-│   │   ├── globals.css
-│   │   ├── layout.tsx
-│   │   ├── not-found.tsx
-│   │   └── page.tsx
-│   ├── components/
-│   │   ├── features/
-│   │   ├── layout/
-│   │   ├── shared/
-│   │   └── ui/
-│   ├── generated/
-│   ├── hooks/
-│   ├── lib/
-│   │   ├── constants/
-│   │   ├── db/
-│   │   ├── formatters/
-│   │   ├── permissions/
-│   │   ├── validations/
-│   │   ├── auth.ts
-│   │   ├── prisma.ts
-│   │   └── utils.ts
-│   ├── services/
-│   ├── types/
-│   └── proxy.ts
-├── .env.example
-├── components.json
-├── package.json
-├── pnpm-lock.yaml
-├── prisma7.config.ts
-├── README.md
-└── tsconfig.json
-```
-
-### Important Directories
-
-| Directory | Purpose |
-| --- | --- |
-| `src/app/` | Application pages, layouts, route groups, and error handling |
-| `src/app/(auth)/` | Authentication pages |
-| `src/app/(dashboard)/` | Authenticated dashboard pages |
-| `src/app/(public)/` | Public-facing pages |
-| `src/app/api/` | API endpoints for application resources |
-| `src/components/features/` | Feature-specific UI components |
-| `src/components/layout/` | Shared layout components and navigation |
-| `src/components/shared/` | Reusable components shared across features |
-| `src/components/ui/` | Reusable shadcn/ui components |
-| `src/hooks/` | Reusable React hooks |
-| `src/lib/` | Authentication, database access, permissions, validation, formatting, and shared utilities |
-| `src/services/` | Application service functions |
-| `src/types/` | Shared TypeScript types |
-| `prisma/` | Database schema, migrations, and seed script |
-| `public/assets/` | Static application assets |
-| `docs/` | Project specifications, API documentation, security guidance, design system, deployment guide, and screenshots |
-
-## Getting Started
-
-### Prerequisites
-
-- Node.js compatible with the project's Next.js version.
-- pnpm package manager.
-- Git.
-- A Supabase project with a PostgreSQL database.
-
-### Clone the Repository
+### 1. Clonar el repositorio
 
 ```bash
-git clone <repository-url>
-cd antorcha
+git clone https://github.com/202602-Ingeniria-Web-Udea/CodeChef-Restaurante.git
+cd CodeChef-Restaurante
 ```
 
-### Open the Project
-
-Open the project in Visual Studio Code or another compatible editor.
-
-```bash
-code .
-```
-
-Install the dependencies:
+### 2. Instalar dependencias
 
 ```bash
 pnpm install
 ```
 
-### Configure Services
+### 3. Configurar variables de entorno
 
-Configure the Supabase database and application authentication settings before starting the application.
-
-- [API](docs/API.md)
-- [Security](docs/SECURITY.md)
-- [Deployment](docs/DEPLOY.md)
-
-### Configure Environment Variables
-
-Create a `.env` file in the project root using `.env.example` as a reference.
+Crear un archivo `.env` en la raíz del proyecto basado en `.env.example`:
 
 ```dotenv
-# Supabase PostgreSQL connection string.
-DATABASE_URL="your-database-connection-string"
+# Supabase PostgreSQL (modo Transaction pooler o Session)
+DATABASE_URL="postgresql://postgres.[TU-PROYECTO]:[TU-PASSWORD]@aws-0-[REGION].pooler.supabase.com:6543/postgres?sslmode=require&supa=base-pooler.x"
 
-# Authentication secret.
-AUTH_SECRET="your-auth-secret"
+# Secreto de sesión NextAuth / Auth.js
+AUTH_SECRET="f6c8d7e9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7"
+NEXTAUTH_SECRET="f6c8d7e9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7"
+NEXTAUTH_URL="http://localhost:3000"
 ```
 
-Replace the example values with the credentials for your environment. Keep secrets out of source control and never expose server-side credentials in client-side code.
+### 4. Sincronizar esquema y poblar la base de datos (Seed)
 
-### Run the Application
+```bash
+# Generar cliente de Prisma
+pnpm run db:generate
 
-Start the development server:
+# Aplicar migraciones / esquema
+pnpm run db:push
+
+# Poblar datos iniciales (usuarios, maestros, transacciones y pedidos)
+pnpm run db:seed
+```
+
+### 5. Iniciar el servidor de desarrollo
 
 ```bash
 pnpm dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) in your browser.
+La aplicación estará disponible en [http://localhost:3000](http://localhost:3000).
 
-### Test Credentials (Cuentas de Acceso de Evaluación)
+---
 
-| Rol | Correo Electrónico | Contraseña | Permisos |
-| --- | --- | --- | --- |
-| `ADMIN` | `admin@codechef.com` | `admin123` | Acceso total: Usuarios, creación de Maestros, Transacciones |
-| `USER` | `laura@codechef.com` | `cliente123` | Acceso operativo: Visualización de Maestros y Transacciones, creación de movimientos |
-| `USER` | `andres@codechef.com` | `cliente123` | Acceso operativo: Visualización de Maestros y Transacciones, creación de movimientos |
+## Verificación de Calidad y Pruebas
 
-### Run Tests
-
-Run automated unit and integration tests (Vitest):
+El proyecto cuenta con una suite completa de pruebas automatizadas y chequeo estático:
 
 ```bash
+# 1. Ejecutar las 34 pruebas automatizadas con Vitest
 pnpm test
-```
 
-Run TypeScript verification:
-
-```bash
+# 2. Verificar tipado estático con TypeScript
 pnpm typecheck
-```
 
-Run ESLint:
-
-```bash
+# 3. Analizar código con ESLint
 pnpm lint
-```
 
-Verify the production build:
-
-```bash
+# 4. Compilar optimizado para producción con Next.js Turbopack
 pnpm build
 ```
 
-## Documentation
+---
 
-| Document | Description |
-| --- | --- |
-| [SPEC.md](docs/SPEC.md) | Product scope and feature specification. |
-| [REQUIREMENTS.md](docs/REQUIREMENTS.md) | Functional and non-functional requirements. |
-| [DESIGNSYSTEM.md](docs/DESIGNSYSTEM.md) | Visual design system and reusable UI components. |
-| [SECURITY.md](docs/SECURITY.md) | Authentication, authorization, and security guidelines. |
-| [API.md](docs/API.md) | API endpoints, request and response contracts, and service communication. |
-| [DEPLOY.md](docs/DEPLOY.md) | Build, deployment, release, and recovery procedures. |
+## Mocks para Formularios de Prueba
 
-## Screenshots
+Utiliza estos datos de prueba realistas para evaluar el funcionamiento del sistema:
 
-### Mobile
+### 1. Creación de Maestro (Solo ADMIN)
+- **Ruta:** `/dashboard/ingredients` -> Botón *"Agregar Maestro"*
+- **Mock A (Sólido por peso):**
+  - Nombre: `Pechuga de Pollo Marinada`
+  - Unidad de Medida: `Kilogramos (KG)`
+  - Saldo Inicial: `25.500`
+- **Mock B (Líquido):**
+  - Nombre: `Salsa BBQ Ahumada Artesanal`
+  - Unidad de Medida: `Litros (L)`
+  - Saldo Inicial: `10.000`
+- **Mock C (Unidades):**
+  - Nombre: `Pan Brioche Artesanal`
+  - Unidad de Medida: `Unidades (UNITS)`
+  - Saldo Inicial: `80.000`
 
-![Antorcha mobile interface](docs/screenshots/mobile.png)
+### 2. Registro de Movimiento de Transacción (ADMIN o USER)
+- **Ruta:** `/dashboard/transactions` -> Seleccionar Maestro -> Botón *"Agregar movimiento"*
+- **Mock Entrada (Reabastecimiento de Proveedor):**
+  - Maestro: `Carne de res`
+  - Tipo de Movimiento: `Entrada`
+  - Cantidad: `12.5`
+  - Motivo: `Compra semanal proveedor San Cayetano`
+  - *Resultado esperado:* El saldo aumenta inmediatamente en +12.500 KG y se refleja en la tabla y en la gráfica.
+- **Mock Salida (Consumo en Cocina):**
+  - Maestro: `Carne de res`
+  - Tipo de Movimiento: `Salida`
+  - Cantidad: `4.2`
+  - Motivo: `Preparación servicio de almuerzos`
+  - *Resultado esperado:* El saldo disminuye en -4.200 KG con validación de saldo disponible.
+- **Mock Salida Inválida (Validación de Error):**
+  - Cantidad superior al stock disponible (ej. `999999`).
+  - *Resultado esperado:* Modal muestra error de validación en rojo indicando saldo insuficiente sin alterar la base de datos.
 
-### Desktop
+### 3. Edición de Rol de Usuario (Solo ADMIN)
+- **Ruta:** `/dashboard/users` -> Botón *"Editar usuario"* sobre Laura Gómez
+- **Cambio:** Modificar de `USER` a `ADMIN`
+- *Resultado esperado:* El badge de Laura cambia inmediatamente a `ADMIN`.
+- **Validación de Seguridad:** Intentar quitarse el rol de `ADMIN` al usuario actualmente en sesión muestra el mensaje protector: *"No puedes quitarte el rol de administrador a ti mismo"*.
 
-![Antorcha desktop dashboard](docs/screenshots/desktop.png)
+---
 
-## Demo
+## Despliegue en Vercel Paso a Paso
 
-[Watch the demo video](docs/demo/demo.mp4)
+1. Iniciar sesión en [Vercel](https://vercel.com) e importar el repositorio `CodeChef-Restaurante`.
+2. Framework Preset: **Next.js**.
+3. Configurar las **Environment Variables** en Vercel:
+   - `DATABASE_URL`: String de conexión de Supabase PostgreSQL con SSL.
+   - `AUTH_SECRET`: Clave aleatoria segura de 32+ caracteres.
+   - `NEXTAUTH_SECRET`: Misma clave que `AUTH_SECRET`.
+   - `NEXTAUTH_URL`: URL asignada por Vercel (ej. `https://codechef-restaurante.vercel.app`).
+4. Build Command: `pnpm run build`
+5. Output Directory: `.next`
+6. Hacer clic en **Deploy**. El pipeline compilará el código y desplegará la aplicación en alta disponibilidad.
 
-## Development
+---
 
-Use pnpm to manage dependencies and run project scripts. Keep the lockfile synchronized with dependency changes.
+## Arquitectura y Principios de Diseño
 
-Follow the project's TypeScript conventions and reusable component patterns. Keep input validation, authorization, and error handling consistent across application pages and API endpoints.
+- **Next.js App Router (v16):** Separación lógica entre rutas públicas `(public)`, rutas de autenticación `(auth)` y panel protegido `(dashboard)`.
+- **SOLID & Capa de Servicios:** Toda la lógica de negocio (inventario, transacciones atómicas, gestión de usuarios) reside en servicios independientes (`src/services/`), desacoplada de los controladores de ruta (`src/app/api/`).
+- **Control Atómico de Transacciones:** Las mutaciones de inventario utilizan transacciones atómicas de Prisma (`prisma.$transaction`) con operaciones a nivel de base de datos (`increment`/`decrement`), eliminando condiciones de carrera (*race conditions*).
+- **Diseño Responsivo:** Barra de navegación lateral fija en escritorio (`lg:block`), y cabecera compacta con menú desplegable tipo cajón (*drawer*) con fondo translúcido en dispositivos móviles y tabletas.
+- **Sistema de Diseño (Antorcha):** Paleta cálida basada en terracota, naranja brasa y tonos tostados inspirados en asador/restaurante, cumpliendo con la directriz de accesibilidad y sin uso de verdes decorativos.
+- **Zero Errores Ortográficos:** Textos, botones y modales revisados gramaticalmente con acentuación y puntuación estricta en español.
 
-Update the relevant documentation whenever application behavior, API contracts, security requirements, or the visual design system changes.
+---
 
-## Testing
+## Licencia
 
-The application is verified through code quality checks, production builds, and functional testing.
-
-- **Code quality:** run ESLint and resolve relevant issues.
-- **Production build:** confirm that the application compiles successfully.
-- **Authentication:** verify sign-in, sign-out, and protected page access.
-- **Authorization:** verify the permissions associated with `ADMIN` and `USER`.
-- **Data operations:** verify the relevant forms, tables, and record management actions.
-- **Inventory:** verify incoming and outgoing movements and balance updates.
-- **Responsive design:** verify the interface on mobile and desktop screen sizes.
-
-```bash
-pnpm lint
-pnpm build
-```
-
-## License
-
-This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.
-
-## Contributors
-
-- **Jesus Torres: [jesus.torresq@udea.edu.co](jesus.torresq@udea.edu.co)** — Developer
-- **Daniela Vela: [daniela.vela@udea.edu.co](daniela.vela@udea.edu.co)** — Developer
-- **Isabela Bedoya: [isabela.bedoya@udea.edu.co](isabela.bedoya@udea.edu.co)** — Developer
+Distribuido bajo la Licencia MIT. Consulta el archivo [LICENSE](LICENSE) para más información.

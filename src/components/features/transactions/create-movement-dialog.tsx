@@ -164,7 +164,7 @@ export function CreateMovementDialog({
                     className={`py-2.5 rounded-xl border text-sm font-semibold transition ${
                       selected
                         ? isIn
-                          ? "bg-emerald-500/10 border-emerald-500/50 text-emerald-400"
+                          ? "bg-amber-500/10 border-amber-500/50 text-amber-300"
                           : "bg-red-500/10 border-red-500/50 text-red-400"
                         : "bg-stone-950/80 border-stone-800 text-stone-400 hover:text-white"
                     }`}

@@ -1,8 +1,10 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { toast } from "sonner";
 import { MaestrosTable, type MaestroItem } from "./maestros-table";
 import { CreateMaestroDialog } from "./create-maestro-dialog";
+import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 
 interface MaestrosViewProps {
   userRole?: string;
@@ -13,6 +15,8 @@ export function MaestrosView({ userRole, initialData = [] }: MaestrosViewProps) 
   const [maestros, setMaestros] = useState<MaestroItem[]>(initialData);
   const [loading, setLoading] = useState(initialData.length === 0);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [statusTarget, setStatusTarget] = useState<MaestroItem | null>(null);
+  const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
 
   const isAdmin = userRole === "ADMIN";
 
@@ -61,6 +65,38 @@ export function MaestrosView({ userRole, initialData = [] }: MaestrosViewProps) 
     };
   }, [initialData.length]);
 
+  const handleConfirmToggleStatus = async () => {
+    if (!statusTarget) return;
+    const nextStatus = statusTarget.status === "ACTIVE" ? "INACTIVE" : "ACTIVE";
+    setIsUpdatingStatus(true);
+
+    try {
+      const res = await fetch(`/api/ingredients/${statusTarget.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: nextStatus }),
+      });
+
+      const body = await res.json();
+      if (!res.ok) {
+        throw new Error(body.error || "Error al actualizar el estado");
+      }
+
+      toast.success(
+        nextStatus === "ACTIVE"
+          ? `Maestro "${statusTarget.name}" activado correctamente`
+          : `Maestro "${statusTarget.name}" desactivado correctamente`
+      );
+      setStatusTarget(null);
+      await refreshData();
+    } catch (err) {
+      console.error("Error toggling status:", err);
+      toast.error(err instanceof Error ? err.message : "Error al actualizar el estado");
+    } finally {
+      setIsUpdatingStatus(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -93,7 +129,12 @@ export function MaestrosView({ userRole, initialData = [] }: MaestrosViewProps) 
       </div>
 
       {/* Table */}
-      <MaestrosTable maestros={maestros} loading={loading} />
+      <MaestrosTable
+        maestros={maestros}
+        loading={loading}
+        isAdmin={isAdmin}
+        onToggleStatus={setStatusTarget}
+      />
 
       {/* Modal Dialog for creating maestro */}
       {isAdmin && (
@@ -103,6 +144,26 @@ export function MaestrosView({ userRole, initialData = [] }: MaestrosViewProps) 
           onSuccess={refreshData}
         />
       )}
+
+      {/* Confirmation Dialog for Toggling Status */}
+      <ConfirmDialog
+        isOpen={statusTarget !== null}
+        title={
+          statusTarget?.status === "ACTIVE"
+            ? `¿Desactivar maestro "${statusTarget?.name}"?`
+            : `¿Activar maestro "${statusTarget?.name}"?`
+        }
+        description={
+          statusTarget?.status === "ACTIVE"
+            ? "Al desactivar este ingrediente maestro, no se podrán registrar nuevos movimientos de entrada o salida hasta que sea activado nuevamente."
+            : "Al activar este ingrediente maestro, volverá a estar disponible para registrar movimientos de inventario."
+        }
+        confirmLabel={statusTarget?.status === "ACTIVE" ? "Sí, desactivar" : "Sí, activar"}
+        variant={statusTarget?.status === "ACTIVE" ? "danger" : "primary"}
+        isLoading={isUpdatingStatus}
+        onConfirm={handleConfirmToggleStatus}
+        onClose={() => setStatusTarget(null)}
+      />
     </div>
   );
 }

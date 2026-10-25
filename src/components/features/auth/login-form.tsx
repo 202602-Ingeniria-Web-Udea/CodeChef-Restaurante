@@ -148,7 +148,7 @@ export function LoginForm() {
             className="p-2.5 rounded-xl bg-stone-800/60 hover:bg-stone-800 border border-stone-700/60 text-left transition-colors"
           >
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-emerald-400">USER</span>
+              <span className="text-xs font-bold text-amber-400">USER</span>
               <span className="text-[10px] text-stone-500 font-mono">cliente123</span>
             </div>
             <p className="text-[11px] text-stone-300 truncate mt-0.5">laura@codechef.com</p>

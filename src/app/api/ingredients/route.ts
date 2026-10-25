@@ -1,7 +1,11 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
 import { Unit } from "@/generated/prisma/enums";
+import {
+  listIngredients,
+  createIngredient,
+  InventoryError,
+} from "@/services/inventory.service";
 
 // GET /api/ingredients - Listar todos los Maestros (Visible para ADMIN y USER)
 export async function GET() {
@@ -11,19 +15,7 @@ export async function GET() {
       return NextResponse.json({ error: "No autorizado" }, { status: 401 });
     }
 
-    const ingredients = await prisma.ingredient.findMany({
-      orderBy: { id: "asc" },
-      include: {
-        createdBy: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-          },
-        },
-      },
-    });
-
+    const ingredients = await listIngredients();
     return NextResponse.json(ingredients);
   } catch (error) {
     console.error("Error fetching ingredients:", error);
@@ -85,57 +77,18 @@ export async function POST(req: Request) {
       );
     }
 
-    // Verificar si ya existe con el mismo nombre
-    const existing = await prisma.ingredient.findUnique({
-      where: { name: name.trim() },
+    const created = await createIngredient({
+      name,
+      unit,
+      initialStock: stockNumber,
+      userId,
     });
 
-    if (existing) {
-      return NextResponse.json(
-        { error: "Ya existe un maestro registrado con ese nombre" },
-        { status: 409 }
-      );
-    }
-
-    // Transacción atómica: Crear Maestro y su movimiento inicial de inventario
-    const newIngredient = await prisma.$transaction(async (tx) => {
-      const ingredient = await tx.ingredient.create({
-        data: {
-          name: name.trim(),
-          unit,
-          stock: stockNumber,
-          createdById: userId,
-        },
-      });
-
-      // Registrar movimiento de saldo inicial en el inventario
-      await tx.inventoryTransaction.create({
-        data: {
-          ingredientId: ingredient.id,
-          quantity: stockNumber,
-          balanceAfter: stockNumber,
-          type: "IN",
-          reason: "Stock inicial",
-          createdById: userId,
-        },
-      });
-
-      return tx.ingredient.findUnique({
-        where: { id: ingredient.id },
-        include: {
-          createdBy: {
-            select: {
-              id: true,
-              name: true,
-              email: true,
-            },
-          },
-        },
-      });
-    });
-
-    return NextResponse.json(newIngredient, { status: 201 });
+    return NextResponse.json(created, { status: 201 });
   } catch (error) {
+    if (error instanceof InventoryError) {
+      return NextResponse.json({ error: error.message }, { status: error.status });
+    }
     console.error("Error creating ingredient:", error);
     return NextResponse.json(
       { error: "Error interno al crear el maestro" },
