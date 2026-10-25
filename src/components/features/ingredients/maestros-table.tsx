@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { formatIngredientName } from "@/lib/formatters/inventory";
 
 export interface MaestroItem {
   id: number;
@@ -108,7 +109,7 @@ export function MaestrosTable({
                     </td>
 
                     <td className="py-3.5 px-4 sm:px-6 font-bold text-white whitespace-nowrap">
-                      {item.name}
+                      {formatIngredientName(item.name)}
                     </td>
 
                     <td className="py-3.5 px-4 sm:px-6 text-right font-mono font-bold text-orange-400 whitespace-nowrap">

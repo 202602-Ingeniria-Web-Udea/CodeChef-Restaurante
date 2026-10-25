@@ -25,6 +25,24 @@ const UNIT_LABELS: Record<string, string> = {
   UNITS: "und",
 };
 
+// Traducciones amigables para nombres de maestros precargados en inglés
+const INGREDIENT_NAME_TRANSLATIONS: Record<string, string> = {
+  "Hamburger bun": "Pan de hamburguesa",
+  "Beef patty": "Carne de res",
+  "Cheese slice": "Queso cheddar tajado",
+  "Tomato": "Tomate fresco",
+  "Lettuce": "Lechuga crespa",
+  "Potato": "Papa sabanera",
+  "Chicken breast": "Pechuga de pollo",
+  "Soda can": "Gaseosa en lata",
+  "Soda": "Gaseosa",
+};
+
+export function formatIngredientName(name: string): string {
+  if (!name) return "";
+  return INGREDIENT_NAME_TRANSLATIONS[name] ?? name;
+}
+
 export function formatQuantity(value: number): string {
   return quantityFormatter.format(value);
 }
@@ -40,4 +58,20 @@ export function formatShortDay(dayKey: string): string {
 
 export function unitLabel(unit: string): string {
   return UNIT_LABELS[unit] ?? unit;
+}
+
+// Traduce motivos comunes registrados en inglés a español
+export function formatReason(reason?: string | null): string {
+  if (!reason) return "—";
+  const trimmed = reason.trim();
+  const lower = trimmed.toLowerCase();
+
+  if (lower === "initial stock") return "Stock inicial";
+  if (lower.startsWith("order #")) {
+    return trimmed.replace(/order #/i, "Pedido #");
+  }
+  if (lower === "expired product") return "Producto vencido";
+  if (lower === "supplier delivery") return "Entrega de proveedor";
+
+  return trimmed;
 }

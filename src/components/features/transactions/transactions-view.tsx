@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import type { IngredientSummary, IngredientTransactions } from "@/types/inventory";
-import { formatDateTime, formatQuantity, unitLabel } from "@/lib/formatters/inventory";
+import { formatDateTime, formatIngredientName, formatQuantity, unitLabel } from "@/lib/formatters/inventory";
 import { TransactionsTable } from "./transactions-table";
 import { BalanceChart } from "./balance-chart";
 import { CreateMovementDialog } from "./create-movement-dialog";
@@ -138,7 +138,7 @@ export function TransactionsView() {
               )}
               {ingredients.map((item) => (
                 <option key={item.id} value={item.id}>
-                  {item.name} ({unitLabel(item.unit)})
+                  {formatIngredientName(item.name)} ({unitLabel(item.unit)})
                 </option>
               ))}
             </select>

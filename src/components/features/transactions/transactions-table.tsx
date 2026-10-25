@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import type { MovementType, TransactionItem } from "@/types/inventory";
-import { formatDateTime, formatQuantity, unitLabel } from "@/lib/formatters/inventory";
+import { formatDateTime, formatQuantity, formatReason, unitLabel } from "@/lib/formatters/inventory";
 
 interface TransactionsTableProps {
   transactions: TransactionItem[];
@@ -123,7 +123,7 @@ export function TransactionsTable({ transactions, unit, loading }: TransactionsT
                         </div>
                       </td>
                       <td className="py-3.5 px-4 sm:px-6 text-stone-400 hidden lg:table-cell">
-                        {item.reason || "—"}
+                        {formatReason(item.reason)}
                       </td>
                     </tr>
                   );

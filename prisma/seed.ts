@@ -53,14 +53,14 @@ async function main() {
   // 3. Ingredientes + transacción de stock inicial (IN)
   // ─────────────────────────────────────────────
   const ingredientsData = [
-    { key: "bun",     name: "Hamburger bun",  unit: "UNITS", stock: 60 },
-    { key: "patty",   name: "Beef patty",     unit: "UNITS", stock: 50 },
-    { key: "cheese",  name: "Cheese slice",   unit: "UNITS", stock: 80 },
-    { key: "tomato",  name: "Tomato",         unit: "KG",    stock: 5 },
-    { key: "lettuce", name: "Lettuce",        unit: "KG",    stock: 3 },
-    { key: "potato",  name: "Potato",         unit: "KG",    stock: 20 },
-    { key: "chicken", name: "Chicken breast", unit: "KG",    stock: 10 },
-    { key: "soda",    name: "Soda can",       unit: "UNITS", stock: 48 },
+    { key: "bun",     name: "Pan de hamburguesa",       unit: "UNITS", stock: 60 },
+    { key: "patty",   name: "Carne de res",              unit: "UNITS", stock: 50 },
+    { key: "cheese",  name: "Queso cheddar tajado",      unit: "UNITS", stock: 80 },
+    { key: "tomato",  name: "Tomate fresco",             unit: "KG",    stock: 5 },
+    { key: "lettuce", name: "Lechuga crespa",            unit: "KG",    stock: 3 },
+    { key: "potato",  name: "Papa sabanera",             unit: "KG",    stock: 20 },
+    { key: "chicken", name: "Pechuga de pollo",          unit: "KG",    stock: 10 },
+    { key: "soda",    name: "Gaseosa en lata",           unit: "UNITS", stock: 48 },
   ] as const;
 
   // Aquí guardamos el id y el stock "en memoria" de cada ingrediente
@@ -77,7 +77,7 @@ async function main() {
         quantity: i.stock,
         balanceAfter: i.stock,
         type: "IN",
-        reason: "Initial stock",
+        reason: "Stock inicial",
         createdById: admin.id,
       },
     });
@@ -112,23 +112,23 @@ async function main() {
   // ─────────────────────────────────────────────
   const productsData = [
     {
-      key: "classic", name: "Classic Burger", price: 18000, category: "Burgers",
+      key: "classic", name: "Hamburguesa Clásica", price: 18000, category: "Hamburguesas",
       recipe: [["bun", 1], ["patty", 1], ["tomato", 0.05], ["lettuce", 0.03]],
     },
     {
-      key: "cheese", name: "Cheeseburger", price: 21000, category: "Burgers",
+      key: "cheese", name: "Hamburguesa con Queso", price: 21000, category: "Hamburguesas",
       recipe: [["bun", 1], ["patty", 1], ["cheese", 2], ["lettuce", 0.03]],
     },
     {
-      key: "chicken", name: "Grilled Chicken", price: 24000, category: "Mains",
+      key: "chicken", name: "Pollo a la Parrilla", price: 24000, category: "Platos Fuertes",
       recipe: [["chicken", 0.2], ["tomato", 0.05], ["lettuce", 0.05]],
     },
     {
-      key: "fries", name: "French Fries", price: 8000, category: "Sides",
+      key: "fries", name: "Papas a la Francesa", price: 8000, category: "Acompañamientos",
       recipe: [["potato", 0.25]],
     },
     {
-      key: "soda", name: "Soda", price: 5000, category: "Drinks",
+      key: "soda", name: "Gaseosa", price: 5000, category: "Bebidas",
       recipe: [["soda", 1]],
     },
   ] as const;
@@ -198,7 +198,7 @@ async function main() {
         }
       }
       for (const [key, qty] of Object.entries(usage)) {
-        await moveStock(key, qty, "OUT", `Order #${order.id}`);
+        await moveStock(key, qty, "OUT", `Pedido #${order.id}`);
       }
     }
   }
@@ -210,7 +210,7 @@ async function main() {
     paymentMethod: "CASH",
     items: [
       { product: "classic", quantity: 1 },
-      { product: "classic", quantity: 1, note: "No tomato" },
+      { product: "classic", quantity: 1, note: "Sin tomate" },
       { product: "fries", quantity: 1 },
       { product: "soda", quantity: 2 },
     ],
@@ -222,7 +222,7 @@ async function main() {
     paymentStatus: "PAID",
     paymentMethod: "CARD",
     items: [
-      { product: "cheese", quantity: 1, note: "Extra cheese" },
+      { product: "cheese", quantity: 1, note: "Queso extra" },
       { product: "fries", quantity: 1 },
     ],
   });
@@ -248,8 +248,8 @@ async function main() {
   // ─────────────────────────────────────────────
   // 6. Ajustes manuales de inventario
   // ─────────────────────────────────────────────
-  await moveStock("tomato", 0.5, "OUT", "Expired product");
-  await moveStock("soda", 24, "IN", "Supplier delivery");
+  await moveStock("tomato", 0.5, "OUT", "Producto vencido");
+  await moveStock("soda", 24, "IN", "Entrega de proveedor");
 
   // ─────────────────────────────────────────────
   // 7. Guardar el stock final de cada ingrediente

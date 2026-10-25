@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { toast } from "sonner";
 import type { IngredientSummary, MovementType } from "@/types/inventory";
-import { formatQuantity, unitLabel } from "@/lib/formatters/inventory";
+import { formatIngredientName, formatQuantity, unitLabel } from "@/lib/formatters/inventory";
 
 interface CreateMovementDialogProps {
   isOpen: boolean;
@@ -85,7 +85,7 @@ export function CreateMovementDialog({
       }
 
       toast.success(
-        `${type === "IN" ? "Entrada" : "Salida"} de ${formatQuantity(quantityNum)} ${unitLabel(ingredient.unit)} registrada en "${ingredient.name}".`
+        `${type === "IN" ? "Entrada" : "Salida"} de ${formatQuantity(quantityNum)} ${unitLabel(ingredient.unit)} registrada en "${formatIngredientName(ingredient.name)}".`
       );
       setLoading(false);
       resetAndClose();
@@ -113,7 +113,7 @@ export function CreateMovementDialog({
               Agregar movimiento
             </p>
             <h2 id="movement-dialog-title" className="text-lg font-bold text-white leading-tight">
-              {ingredient.name}
+              {formatIngredientName(ingredient.name)}
             </h2>
             <p className="text-xs text-stone-400 mt-0.5">
               Saldo actual: {formatQuantity(ingredient.stock)} {unitLabel(ingredient.unit)}
