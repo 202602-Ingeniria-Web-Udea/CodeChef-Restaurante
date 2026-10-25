@@ -66,9 +66,23 @@ async function main() {
   // Aquí guardamos el id y el stock "en memoria" de cada ingrediente
   const ing: Record<string, { id: number; stock: number }> = {};
 
+  // Helper para generar fechas en días pasados para tener historial rico en las gráficas
+  const daysAgo = (days: number, hours = 10, minutes = 0): Date => {
+    const d = new Date();
+    d.setDate(d.getDate() - days);
+    d.setHours(hours, minutes, 0, 0);
+    return d;
+  };
+
   for (const i of ingredientsData) {
     const created = await prisma.ingredient.create({
-      data: { name: i.name, unit: i.unit, stock: i.stock, createdById: admin.id },
+      data: {
+        name: i.name,
+        unit: i.unit,
+        stock: i.stock,
+        createdById: admin.id,
+        createdAt: daysAgo(6, 8, 30),
+      },
     });
 
     await prisma.inventoryTransaction.create({
@@ -79,6 +93,7 @@ async function main() {
         type: "IN",
         reason: "Stock inicial",
         createdById: admin.id,
+        createdAt: daysAgo(6, 8, 30),
       },
     });
 
@@ -90,7 +105,8 @@ async function main() {
     key: string,
     quantity: number,
     type: "IN" | "OUT",
-    reason: string
+    reason: string,
+    createdAt: Date = new Date()
   ) {
     const item = ing[key];
     item.stock = round3(type === "IN" ? item.stock + quantity : item.stock - quantity);
@@ -103,6 +119,7 @@ async function main() {
         type,
         reason,
         createdById: admin.id,
+        createdAt,
       },
     });
   }
@@ -164,7 +181,9 @@ async function main() {
     paymentStatus: "PENDING" | "PAID" | "REJECTED" | "REFUNDED";
     paymentMethod?: "CASH" | "CARD" | "TRANSFER";
     items: { product: string; quantity: number; note?: string }[];
+    createdAt?: Date;
   }) {
+    const orderDate = opts.createdAt ?? new Date();
     const total = opts.items.reduce(
       (sum, it) => sum + prod[it.product].price * it.quantity,
       0
@@ -177,6 +196,7 @@ async function main() {
         paymentStatus: opts.paymentStatus,
         paymentMethod: opts.paymentMethod,
         total,
+        createdAt: orderDate,
         items: {
           create: opts.items.map((it) => ({
             productId: prod[it.product].id,
@@ -198,16 +218,18 @@ async function main() {
         }
       }
       for (const [key, qty] of Object.entries(usage)) {
-        await moveStock(key, qty, "OUT", `Pedido #${order.id}`);
+        await moveStock(key, qty, "OUT", `Pedido #${order.id}`, orderDate);
       }
     }
   }
 
+  // Día -5: Pedido entregado (consumo de pan, carne, papas, gaseosa)
   await createOrder({
     userId: laura.id,
     status: "DELIVERED",
     paymentStatus: "PAID",
     paymentMethod: "CASH",
+    createdAt: daysAgo(5, 13, 15),
     items: [
       { product: "classic", quantity: 1 },
       { product: "classic", quantity: 1, note: "Sin tomate" },
@@ -216,13 +238,48 @@ async function main() {
     ],
   });
 
+  // Día -4: Ajuste manual por producto vencido (tomate)
+  await moveStock("tomato", 0.5, "OUT", "Producto vencido", daysAgo(4, 11, 0));
+
+  // Día -3: Pedido entregado (consumo de queso, pan, carne, papas)
+  await createOrder({
+    userId: andres.id,
+    status: "DELIVERED",
+    paymentStatus: "PAID",
+    paymentMethod: "CARD",
+    createdAt: daysAgo(3, 19, 45),
+    items: [
+      { product: "cheese", quantity: 1, note: "Queso extra" },
+      { product: "fries", quantity: 1 },
+    ],
+  });
+
+  // Día -2: Entrega de proveedor (reabastecimiento de gaseosa y carne)
+  await moveStock("soda", 24, "IN", "Entrega de proveedor", daysAgo(2, 9, 30));
+  await moveStock("patty", 20, "IN", "Entrega de proveedor", daysAgo(2, 9, 35));
+
+  // Día -1: Pedido entregado (consumo de pollo, tomate, lechuga, gaseosa)
+  await createOrder({
+    userId: laura.id,
+    status: "DELIVERED",
+    paymentStatus: "PAID",
+    paymentMethod: "TRANSFER",
+    createdAt: daysAgo(1, 14, 20),
+    items: [
+      { product: "chicken", quantity: 1 },
+      { product: "soda", quantity: 1 },
+    ],
+  });
+
+  // Hoy: Pedido en preparación, pedido pendiente y pedido cancelado
   await createOrder({
     userId: andres.id,
     status: "PREPARING",
     paymentStatus: "PAID",
     paymentMethod: "CARD",
+    createdAt: daysAgo(0, 11, 10),
     items: [
-      { product: "cheese", quantity: 1, note: "Queso extra" },
+      { product: "classic", quantity: 1 },
       { product: "fries", quantity: 1 },
     ],
   });
@@ -231,6 +288,7 @@ async function main() {
     userId: laura.id,
     status: "PENDING",
     paymentStatus: "PENDING",
+    createdAt: daysAgo(0, 12, 0),
     items: [
       { product: "chicken", quantity: 1 },
       { product: "soda", quantity: 1 },
@@ -242,14 +300,14 @@ async function main() {
     status: "CANCELLED",
     paymentStatus: "REFUNDED",
     paymentMethod: "TRANSFER",
+    createdAt: daysAgo(0, 12, 30),
     items: [{ product: "classic", quantity: 2 }],
   });
 
   // ─────────────────────────────────────────────
-  // 6. Ajustes manuales de inventario
+  // 6. Ajuste manual de inventario de hoy
   // ─────────────────────────────────────────────
-  await moveStock("tomato", 0.5, "OUT", "Producto vencido");
-  await moveStock("soda", 24, "IN", "Entrega de proveedor");
+  await moveStock("lettuce", 0.2, "OUT", "Merma en cocina", daysAgo(0, 14, 0));
 
   // ─────────────────────────────────────────────
   // 7. Guardar el stock final de cada ingrediente

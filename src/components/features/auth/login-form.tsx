@@ -48,7 +48,7 @@ export function LoginForm() {
   };
 
   return (
-    <div className="w-full max-w-md bg-stone-900/90 border border-stone-800 rounded-2xl shadow-2xl p-8 backdrop-blur-md">
+    <div className="w-full max-w-md bg-stone-900/90 border border-stone-800 rounded-2xl shadow-2xl p-6 sm:p-8 backdrop-blur-md">
       {/* Header */}
       <div className="text-center mb-8">
         <div className="w-14 h-14 mx-auto rounded-2xl bg-gradient-to-tr from-orange-600 to-amber-500 flex items-center justify-center font-black text-white text-2xl shadow-lg shadow-orange-600/30 mb-4">
@@ -129,29 +129,37 @@ export function LoginForm() {
         <p className="text-[11px] font-semibold text-stone-400 mb-3 text-center uppercase tracking-wider">
           Cuentas de prueba del sistema
         </p>
-        <div className="grid grid-cols-2 gap-2.5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
           <button
             type="button"
             onClick={() => setCredentials("admin@codechef.com", "admin123")}
-            className="p-2.5 rounded-xl bg-stone-800/60 hover:bg-stone-800 border border-stone-700/60 text-left transition-colors"
+            className="p-3 rounded-xl bg-stone-800/60 hover:bg-stone-800 border border-stone-700/60 text-left transition-colors flex flex-col gap-1 focus:outline-none focus:ring-1 focus:ring-orange-500"
           >
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-orange-400">ADMIN</span>
-              <span className="text-[10px] text-stone-500 font-mono">admin123</span>
-            </div>
-            <p className="text-[11px] text-stone-300 truncate mt-0.5">admin@codechef.com</p>
+            <span className="text-xs font-bold text-orange-400 w-fit px-2 py-0.5 rounded-md bg-orange-500/10 border border-orange-500/20">
+              ADMIN
+            </span>
+            <p className="text-[11px] text-stone-400 font-mono">
+              Contraseña: <span className="text-stone-200 font-semibold">admin123</span>
+            </p>
+            <p className="text-xs text-stone-300 break-all">
+              admin@codechef.com
+            </p>
           </button>
 
           <button
             type="button"
             onClick={() => setCredentials("laura@codechef.com", "cliente123")}
-            className="p-2.5 rounded-xl bg-stone-800/60 hover:bg-stone-800 border border-stone-700/60 text-left transition-colors"
+            className="p-3 rounded-xl bg-stone-800/60 hover:bg-stone-800 border border-stone-700/60 text-left transition-colors flex flex-col gap-1 focus:outline-none focus:ring-1 focus:ring-amber-500"
           >
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-amber-400">USER</span>
-              <span className="text-[10px] text-stone-500 font-mono">cliente123</span>
-            </div>
-            <p className="text-[11px] text-stone-300 truncate mt-0.5">laura@codechef.com</p>
+            <span className="text-xs font-bold text-amber-400 w-fit px-2 py-0.5 rounded-md bg-amber-500/10 border border-amber-500/20">
+              USER
+            </span>
+            <p className="text-[11px] text-stone-400 font-mono">
+              Contraseña: <span className="text-stone-200 font-semibold">cliente123</span>
+            </p>
+            <p className="text-xs text-stone-300 break-all">
+              laura@codechef.com
+            </p>
           </button>
         </div>
       </div>
