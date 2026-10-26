@@ -14,7 +14,8 @@ Proyecto evaluativo para la asignatura **Ingeniería Web (35%)** — Universidad
 | **Daniela Vela** | `daniela.vela@udea.edu.co` | Administradora de Base de Datos & Backend |
 | **Isabela Bedoya** | `isabela.bedoya@udea.edu.co` | Desarrolladora Fullstack |
 
-- **Repositorio:** [202602-Ingeniria-Web-Udea/CodeChef-Restaurante](https://github.com/202602-Ingeniria-Web-Udea/CodeChef-Restaurante)
+- **Repositorio en la Organización:** [202602-Ingeniria-Web-Udea/CodeChef-Restaurante](https://github.com/202602-Ingeniria-Web-Udea/CodeChef-Restaurante)
+- **Repositorio conectado a Vercel:** [Isa-Bedoya-UdeA/CodeChef-Restaurante](https://github.com/Isa-Bedoya-UdeA/CodeChef-Restaurante)
 - **Despliegue en Vercel:** [codechef-restaurante.vercel.app](https://codechef-restaurante.vercel.app)
 
 ---
