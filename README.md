@@ -10,7 +10,7 @@ Proyecto evaluativo para la asignatura **Ingeniería Web (35%)** — Universidad
 
 | Nombre | Correo Institucional | Rol en el Proyecto |
 | --- | --- | --- |
-| **Jesus David Torres Quejada** | `jesus.torresq@udea.edu.co` | Desarrollador Fullstack |
+| **Jesus Estiven Torres Quintero** | `jesus.torresq@udea.edu.co` | Desarrollador Fullstack |
 | **Daniela Vela** | `daniela.vela@udea.edu.co` | Administradora de Base de Datos & Backend |
 | **Isabela Bedoya** | `isabela.bedoya@udea.edu.co` | Desarrolladora Fullstack |
 
